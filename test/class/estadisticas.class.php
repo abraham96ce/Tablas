@@ -121,7 +121,7 @@ class Estadisticas extends CommonObject
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
 		'model_pdf' => array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>'1', 'position'=>1010, 'notnull'=>-1, 'visible'=>0,),
 		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>2000, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Borrador', '1'=>'Validado', '9'=>'Cancelado'), 'validate'=>'1',),
-		//'Nombre' => array('type'=>'integer:Societe:societe/class/societe.class.php:1', 'label'=>'Nombre', 'enabled'=>'1', 'position'=>11, 'notnull'=>0, 'visible'=>1,),
+		//'Nombre' => array('type'=>'integer:Societe:societe/class/societe.class.php:1', 'label'=>'Nombre', 'enabled'=>'1', 'position'=>11, 'notnull'=>1, 'visible'=>1,),
 	);
 	public $rowid;
 	public $ref;

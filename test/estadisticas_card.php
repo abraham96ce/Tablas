@@ -245,22 +245,29 @@ llxHeader('', $title, $help_url);
 
 // Part to create
 if ($action == 'create') {
-	/*?>
+
+	print load_fiche_titre($langs->trans(/*"NuevoObject",*/ $langs->transnoentitiesnoconv("Promedios")), '', 'object_'.$object->picto);
+
+	?>
 	
 	<style>
 		.myDiv {
-			background-color: #f9f9f9;
-			padding: 10px;
-			width: 300px;
-			margin-left: auto;
-			margin-bottom: 20px;
+		background-color: #f9f9f9;
+		padding: 10px;
+		width: 300px;
+		margin-left: auto;
+		margin-bottom: 20px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		border: 2px solid #1e90ff;
+		border-radius: 6px;
 		}
 
 		.myDiv h2 {
-			color: #333;
-			font-size: 18px;
-			margin-bottom: 10px;
-		}
+            color: #337ab7; /* Color azul similar a Dolibarr */
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
 		.myDiv p {
 			color: #666;
@@ -273,46 +280,27 @@ if ($action == 'create') {
 			font-weight: bold;
 			color: #0275d8;
 		}
-
-		.boton-filtrar {
-			background-color: #1e90ff;
-			color: #fff;
-			border: none;
-			padding: 8px 16px;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 14px;
-			margin-right: 10px;
-		}
-
-		.boton-restaurar {
-			background-color: #e2e2e2;
-			color: #333;
-			border: 1px solid #ccc;
-			padding: 8px 16px;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 14px;
-		}
 	</style>
+
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 	<div style="text-align: center; display: flex; justify-content: space-between;">
 		<div style="text-align: left;">
-			<h2>Lista de Promedios</h2>
+			<h2 style="Color: #6c6aa8">Lista de Promedios</h2>
 			<label for="Promedios">Nombre</label>
-				<select name="Promedios" id="Promedios" onchange="seleccionar(this)">
-					<option value=""></option>
-						<?php
-						$sqlNombres = 'SELECT * FROM llx_societe';
-						$resultNombres = $db->query($sqlNombres);
+			<select name="Promedios" id="Promedios" onchange="seleccionar(this)" style="width: 500px">
+				<option value=""></option>
+				<?php
+				$sqlNombres = 'SELECT * FROM llx_societe';
+				$resultNombres = $db->query($sqlNombres);
 
-						while ($obj = $db->fetch_object($resultNombres)) {
-							?>
-							<option value="<?php print $obj->nom; ?>"><?php print $obj->nom; ?></option>
-							<?php
-						}
-						?>
-				</select>
+				while ($obj = $db->fetch_object($resultNombres)) {
+					?>
+					<option value="<?php print $obj->nom; ?>"><?php print $obj->nom; ?></option>
+					<?php
+				}
+				?>
+			</select>
 		</div>
 
 		<?php
@@ -331,74 +319,89 @@ if ($action == 'create') {
 			<?php
 		}
 		?>
+
+		<div class="myDiv" id="noDataDiv" style="text-align: left;">
+			<h2></h2>
+			<p class="promedio"></p>
+		</div>
 	</div>
 
-	<script>
-		function seleccionar(selectElement) {
-			var selectedValue = selectElement.value;
-			var divElements = document.getElementsByClassName("myDiv");
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-			for (var i = 0; i < divElements.length; i++) {
-				var div = divElements[i];
-				var nombreDiv = div.getElementsByTagName("h2")[0].textContent;
+	<script>
+		$(document).ready(function() {
+			function seleccionar(selectElement) {
+				var selectedValue = $(selectElement).val();
+				var divElements = $(".myDiv");
+				var noDataDiv = $("#noDataDiv");
 
 				if (selectedValue === "") {
-					div.style.display = "none";
-				} else if (nombreDiv.includes(selectedValue)) {
-					div.style.display = "block";
+					divElements.hide();
+					noDataDiv.show();
 				} else {
-					div.style.display = "none";
+					divElements.each(function() {
+						var nombreDiv = $(this).find("h2").text();
+
+						if (nombreDiv.includes(selectedValue)) {
+							$(this).show();
+						} else {
+							$(this).hide();
+						}
+					});
+					noDataDiv.hide();
 				}
 			}
-		}
+
+			$("#Promedios").on("change", function() {
+				seleccionar(this);
+				$(this).select2("close");
+			});
+
+			$("#Promedios").select2({
+                placeholder: "Seleccione un nombre",
+                allowClear: true,
+            });
+		});
 	</script>
 
 	<hr style="margin-top: 20px; margin-bottom: 20px;">
 
-	<div>
-		<table id="tabla_resultados" style="border-collapse: collapse; width: 100%;">
-			<tr>
-				<th colspan="5" style="border: 1px solid black; padding: 8px; background-color: lightgray;">Resultados</th>
-			</tr>
-			<tr>
-				<th style="border: 1px solid black; padding: 8px; background-color: lightcyan;">Numero</th>
-				<th style="border: 1px solid black; padding: 8px; background-color: lightblue;">Nombre</th>
-				<th style="border: 1px solid black; padding: 8px; background-color: lightgreen;">Fecha</th>
-				<th style="border: 1px solid black; padding: 8px; background-color: lightyellow">Teléfono</th>
-				<th style="border: 1px solid black; padding: 8px; background-color: lightsalmon;">Calificación</th>
+	<div class="fichecenter">
+		<table id="tabla_resultados" class="noborder" width="100%">
+			<tr class="liste_titre">
+				<td>Numero</td>
+				<td>Nombre</td>
+				<td>Fecha</td>
+				<td>Teléfono</td>
+				<td>Calificación</td>
 			</tr>
 			<?php
-			$sql = 'SELECT ROW_NUMBER() OVER (ORDER BY t.rowid) AS numero, s.nom AS nombre, t.Fecha, s.phone AS telefono, t.Resultado
+			$sql = 'SELECT ROW_NUMBER() OVER (ORDER BY t.rowid) AS numero, s.rowid AS id_tercero, s.nom AS nombre, t.Fecha, s.phone AS telefono, t.Resultado
 					FROM llx_societe s
 					INNER JOIN llx_test_pruebas t ON t.Nombre = s.rowid';
 			$result = $db->query($sql);
 			
 			while ($obj = $db->fetch_object($result)) {
+				$enlace = '/dolibarr/societe/card.php?socid=' . $obj->id_tercero . '&save_lastsearch_values=1';
 				?>
-				<tr>
-					<td style="border: 1px solid black; padding: 8px;">
-						<?php
-						print $obj->numero;
-						?>
+				<tr class="oddeven">
+					<td>
+						<?php print $obj->numero; ?></td>   
+					<td>
+						<i class="fas fa-building" style="color: #6c6aa8"></i>
+						<a href="<?php print $enlace; ?>" style="Color: #6c6aa8">
+						<?php print $obj->nombre; ?>
+						</a>
 					</td>
-					<td style="border: 1px solid black; padding: 8px;">
-						<?php
-						print $obj->nombre;
-						?>
+					<td> 
+						<?php print $obj->Fecha; ?> 
 					</td>
-					<td style="border: 1px solid black; padding: 8px;">
-						<?php
-						print $obj->Fecha;
-						?>
+					<td> 
+						<?php print $obj->telefono; ?> 
 					</td>
-					<td style="border: 1px solid black; padding: 8px;">
-						<?php
-						print $obj->telefono;
-						?>
-					</td><td style="border: 1px solid black; padding: 8px;">
-						<?php
-						print $obj->Resultado;
-						?>
+					<td> 
+						<?php print $obj->Resultado; ?> 
 					</td>
 				</tr>
 				<?php
@@ -408,48 +411,65 @@ if ($action == 'create') {
 	</div>
 	
 	<script>
-		var tabla_O;
-		function filtrar() {
-			var terceroSeleccionado = document.getElementById("Terceros").value;
-			var tabla = document.getElementById("tabla_resultados");
-			var filas = tabla.getElementsByTagName("tr");
+		$(document).ready(function() {
+			var tabla_O;
 
-			if (terceroSeleccionado.trim() === "") {
-				return;
-			}
+			function filtrar() {
+				var terceroSeleccionado = $("#Terceros").val().trim();
+				var tabla = $("#tabla_resultados");
+				var filas = tabla.find("tr");
 
-			if(!tabla_O){
-				tabla_O = tabla.innerHTML;
-			}
-
-			for (var i = 1; i < filas.length; i++) {
-				var celdaNombre = filas[i].getElementsByTagName("td")[1];
-				if (celdaNombre) {
-					var nombre = celdaNombre.textContent || celdaNombre.innerText;
-					if (nombre.trim() === terceroSeleccionado.trim()) {
-						filas[i].style.display = "";
-					} else {
-						filas[i].style.display = "none";
-					}
+				if (terceroSeleccionado === "") {
+					return;
 				}
-			}
-		}
-		function restaurar() {
-			var terceroSeleccionado = document.getElementById("Terceros").value;
-			var tabla = document.getElementById("tabla_resultados");
-			var filas = tabla.getElementsByTagName("tr");
 
-			for (var i = 1; i < filas.length; i++) {
-				var celdaNombre = filas[i].getElementsByTagName("td")[1];
-				if (celdaNombre) {
-					var nombre = celdaNombre.textContent || celdaNombre.innerText;
-					if (nombre.trim() !== terceroSeleccionado.trim()) {
-						filas[i].style.display = "";
-					}
+				if (!tabla_O) {
+					tabla_O = tabla.html();
 				}
+
+				filas.each(function() {
+					var celdaNombre = $(this).find("td:eq(1)");
+					if (celdaNombre.length) {
+						var nombre = celdaNombre.text().trim();
+						if (nombre === terceroSeleccionado) {
+							$(this).show();
+						} else {
+							$(this).hide();
+						}
+					}
+				});
 			}
-		}
+
+			function restaurar() {
+				var terceroSeleccionado = $("#Terceros").val().trim();
+				var tabla = $("#tabla_resultados");
+				var filas = tabla.find("tr");
+
+				filas.each(function() {
+					var celdaNombre = $(this).find("td:eq(1)");
+					if (celdaNombre.length) {
+						var nombre = celdaNombre.text().trim();
+						if (nombre !== terceroSeleccionado) {
+							$(this).show();
+						}
+					}
+				});
+			}
+
+			$("#Terceros").select2({
+				placeholder: " ",
+				allowClear: true,
+			});
+
+			$("#Terceros").on("change", function() {
+				terceroSeleccionado = $(this).val().trim();
+			});
+
+			$("#filtrarBtn").on("click", filtrar);
+			$("#restaurarBtn").on("click", restaurar);
+		});
 	</script>
+
 
 	<div style="text-align: right;">
 		<form action="/" method="GET">
@@ -457,7 +477,7 @@ if ($action == 'create') {
 				<select name="Terceros" id="Terceros">
 					<option value=""></option>
 					<?php
-					$sql = 'SELECT nom FROM llx_societe';
+					$sql = 'SELECT * FROM llx_societe';
 					$result = $db->query($sql);
 
 					while ($obj = $db->fetch_object($result)) {
@@ -467,18 +487,16 @@ if ($action == 'create') {
 					}
 					?>
 				</select>
-			<input type="button" value="Filtrar" class="boton-filtrar resaltado" onclick="filtrar()">
-			<input type="button" value="Restaurar" class="boton-restaurar" onclick="restaurar()">
+			<input type="button" value="Filtrar" class="butActionDelete" id="filtrarBtn">
+			<input type="button" value="Restaurar" class="butAction" id="restaurarBtn">
 		</form>
 	</div>
 
-	<?php*/
+	<?php
 
 	if (empty($permissiontoadd)) {
 		accessforbidden('NotEnoughPermissions', 0, 1);
 	}
-
-	//print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Estadisticas")), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

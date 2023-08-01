@@ -24,6 +24,6 @@ CREATE TABLE llx_test_estadisticas(
 	import_key varchar(14), 
 	model_pdf varchar(255), 
 	status integer NOT NULL, 
-	Nombre integer
+	Nombre integer NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

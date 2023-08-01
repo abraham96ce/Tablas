@@ -263,7 +263,7 @@ if ($action == 'create') {
 		}
 
 		.myDiv h2 {
-            color: #337ab7; /* Color azul similar a Dolibarr */
+            color: #337ab7;
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 10px;
